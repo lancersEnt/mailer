@@ -5,6 +5,8 @@ import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from './mailer/mailer.module';
 import { join } from 'path';
+import { KafkaModule } from './kafka/kafka.module';
+
 @Module({
   imports: [
     MailModule.forRootAsync({
@@ -35,6 +37,7 @@ import { join } from 'path';
       inject: [ConfigService],
     }),
     MailerModule,
+    KafkaModule,
   ],
   providers: [AppService],
 })

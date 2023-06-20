@@ -1,35 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { ISendMailInput, ISendMailPayload } from './mailer.interface';
 import { MailerService as MailService } from '@nestjs-modules/mailer';
-import { KafkaClient, Consumer } from 'kafka-node';
+import { KafkaClient, Consumer, OffsetFetchRequest, Offset } from 'kafka-node';
 import { join } from 'path';
 import * as ejs from 'ejs';
 import { readFileSync } from 'fs';
 
 @Injectable()
 export class MailerService {
-  private readonly consumer: Consumer;
+  constructor(private readonly service: MailService) {}
 
-  constructor(private readonly service: MailService) {
-    const kafkaClient = new KafkaClient({ kafkaHost: 'localhost:9092' });
+  async send(mailInput: ISendMailInput): Promise<ISendMailPayload> {
+    const path = join(__dirname, `./templates/${mailInput.template}.ejs`);
 
-    this.consumer = new Consumer(
-      kafkaClient,
-      [
-        { topic: 'user_created', partition: 0, offset: 0 },
-        { topic: 'forgot_password', partition: 0, offset: 0 },
-      ],
-      { fromOffset: true, groupId: 'myKlad' },
-    );
-  }
-
-  async send(input: ISendMailInput): Promise<ISendMailPayload> {
-    const path = join(__dirname, `./templates/${input.template}.ejs`);
-
-    const mailInput = {
-      ...input,
-      user: JSON.parse(input.user),
-    };
+    // const mailInput = {
+    //   ...input,
+    //   user: JSON.parse(input.user),
+    // };
 
     const template = readFileSync(path, 'utf8');
     const compiledTemplate = ejs.compile(template);
@@ -60,17 +47,5 @@ export class MailerService {
     });
 
     return { isSent: true };
-  }
-
-  onModuleInit() {
-    this.consumer.on('message', (message) => {
-      const parsedMessage = JSON.parse(<string>message.value);
-      this.send({
-        to: parsedMessage.payload.email,
-        template: parsedMessage.template,
-        user: JSON.stringify(parsedMessage.payload),
-      });
-      // Process the parsed message here
-    });
   }
 }
