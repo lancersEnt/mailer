@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ISendMailInput, ISendMailPayload } from './mailer.interface';
 import { MailerService as MailService } from '@nestjs-modules/mailer';
-import { KafkaClient, Consumer, OffsetFetchRequest, Offset } from 'kafka-node';
 import { join } from 'path';
 import * as ejs from 'ejs';
 import { readFileSync } from 'fs';
@@ -12,12 +11,6 @@ export class MailerService {
 
   async send(mailInput: ISendMailInput): Promise<ISendMailPayload> {
     const path = join(__dirname, `./templates/${mailInput.template}.ejs`);
-
-    // const mailInput = {
-    //   ...input,
-    //   user: JSON.parse(input.user),
-    // };
-
     const template = readFileSync(path, 'utf8');
     const compiledTemplate = ejs.compile(template);
     const renderedContent = compiledTemplate({

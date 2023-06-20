@@ -11,6 +11,7 @@ import { KafkaModule } from './kafka/kafka.module';
   imports: [
     MailModule.forRootAsync({
       imports: [ConfigModule],
+      // !! Hardcoded SMTP CONFIG
       useFactory: async (configService: ConfigService) => ({
         transport: {
           host: 'smtp.mailtrap.io',
