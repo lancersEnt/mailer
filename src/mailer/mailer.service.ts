@@ -26,6 +26,9 @@ export class MailerService {
       case 'forgot-password':
         subject = 'MyKlad - Demande de réinitialisation de mot de passe';
         break;
+      case 'password-changed':
+        subject = 'MyKlad - Mot de passe modifié';
+        break;
       default:
         break;
     }

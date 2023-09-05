@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { log } from 'console';
 import { Kafka, Producer, logLevel } from 'kafkajs';
 import { MailerService } from 'src/mailer/mailer.service';
 
@@ -35,6 +36,7 @@ export class KafkaService {
     await consumer.run({
       eachMessage: async ({ topic, partition, message, heartbeat }) => {
         const payload = JSON.parse(message.value.toString());
+        log(payload);
         this.mailer.send({
           template: payload.template,
           to: payload.payload.email,
@@ -46,6 +48,6 @@ export class KafkaService {
   }
 
   async onModuleInit() {
-    await this.consume(['forgot_password', 'user_created']);
+    await this.consume(['forgot_password', 'user_created', 'password_changed']);
   }
 }
